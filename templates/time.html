@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mala-eh</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .list-group-item.disabled, .list-group-item:disabled {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>timings</h2>
+        <p>WHEN EAT MALA</p>
+        <form method="POST">
+            <div class="row">
+                {% for day in time_slots|groupby('time.date') %}
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>{{ day.grouper|date_format('%A, %b %d') }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    {% for slot in day.list %}
+                                    <label class="list-group-item {% if slot.busy%}list-group-item-danger{% endif %}">
+                                        <input type="checkbox" 
+                                        name="time_slot" 
+                                        value="{{ slot.time.isoformat() }}" 
+                                        class="form-check-input me-1" 
+                                        {% if slot.busy %}disabled{% endif %}>
+                                        {{ slot.formatted }}
+                                        {% if slot.busy %}(busy){% endif %}
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">save!</button>
+        </form>
+    </div>
+
+    <script>
+
+    </script>
+
+</body>
