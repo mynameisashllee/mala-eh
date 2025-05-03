@@ -1,2 +1,7 @@
 # ignore dotenvs
 *.env
+
+# random crap
+/app2.py
+/functions.py
+/__pycache__

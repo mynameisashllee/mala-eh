@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ingredients!</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .column {
+            width: 48%;
+        }
+        .ingredient-list {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .counter {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .selected {
+            background-color: #e0f7fa;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .next-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>choose ingredients</h1>
+    <p>select up to 3 ingredients you like, and up to 3 you don't</p>
+    <div class="container">
+        <div class="column">
+            <h2>yes!</h2>
+            <div class="counter" id="yescounter">0/3</div>
+            <div class="ingredient-list" id="yeslist">
+                {% for ingredient in ingredients%}
+                <div class="ingredient" onclick="toggle(this, 'yes')">{{ ingredient }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="column">
+            <h2>no!</h2>
+            <div class="counter" id="nocounter">0/3</div>
+            <div class="ingredient-list" id="nolist">
+                {% for ingredient in ingredients %}
+                <div class="ingredient" onclick="toggle(this, 'no')">{{ ingredient }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <button id="next-btn" class="next-btn" onclick="submitSelections()" disabled>next</button>
+    <script>
+        const max = 3;
+        let yes = [];
+        let no = [];
+        function toggle(element, type) {
+            const ingredient = element.textContent;
+            if (type == 'yes') {
+                if (yes.includes(ingredient)) {
+                    yes = yes.filter(item => item !== ingredient);
+                    element.classList.remove('selected');
+                } else if (yes.length < max) {
+                    if(!no.includes(ingredient)) {
+                        yes.push(ingredient);
+                        element.classList.add('selected');
+                    }
+                }
+                updateCounter('yes', yes.length);
+            } else {
+                if (no.includes(ingredient)) {
+                    no = no.filter(item => item !== ingredient);
+                    element.classList.remove('selected');
+                } else if (no.length < max) {
+                    if (!yes.includes(ingredient)) {
+                        no.push(ingredient);
+                        element.classList.add('selected');
+                    }
+                }
+                updateCounter('no', no.length);
+            }
+            document.getElementById('next-btn').disabled = (yes.length === 0 && no.length === 0);
+        }
+
+        function updateCounter(type, count) {
+            document.getElementById(`${type}counter`).textContent = `${count}/${max}`;
+        }
+
+        function submitSelections() {
+            window.location.href = '/spice';
+        }
+    </script>
+</body>
