@@ -8,13 +8,13 @@ mala-eh is a pun of the singaporean expression _"walao eh"_ expressing surprise 
 
 # done
 - ui for some screens
-- buggy login
+- login
 
 # to-dos
 - functionality
-    - fix login
     - add group codes and sessions
     - add sharing functionality
+    - calendar
     - api
         - maps
             - show stalls around you

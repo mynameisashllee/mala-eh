@@ -10,22 +10,11 @@
         <h2>mala-eh.</h2>
         <button onclick="window.location.href='/google_login'">
             login with google
-        </button>"
-        <p></p>
-        <a href="{{ url_for('google_login') }}">create group</a>
-        <button id="myButton">join group</button>
+        </button>
         <div id="container">
         </div>
     <script>
-        const button = document.getElementById('myButton');
-        const container = document.getElementById('container');
-
-        button.addEventListener('click', function() {
-            const textField = document.createElement('input');
-            textField.type = 'text';
-            textField.name = 'newTextField'; // Optional: Add a name attribute
-            container.appendChild(textField); // Add the new text field to the container
-        });
     </script>
 
 </body>
+</html>

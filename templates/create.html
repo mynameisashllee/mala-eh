@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>make a group</title>
+</head>
+<body>
+        <h2>mala-eh.</h2>
+        <p>enter group size</p>
+        <input type="number" name="groupsize" value="2" min="2"><br>
+        <button onclick="genCode()" id="submitbtn">submit</button>
+        <div id="result" style="display: none;">
+            your code is <span id="code"></span><br>
+            <button onclick="shareCode()">share</button>
+            <button onclick="window.location.href='/time'" id="joinbtn">join</button>
+        </div>
+
+        <script>
+            function genCode() {
+                const chars = 'abcdefghjkmnopqrstuvwxyz0123456789';
+                let code = '';
+                for (let i=0; i<6; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                document.getElementById('code').textContent = code;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('submitbtn').style.display = 'none';
+            }
+            
+            function shareCode() {
+                const code = document.getElementById('code').textContent;
+                const toShare = `join my mala group with this code: ${code} @ localhost:5000!`;
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'group code',
+                        text: toShare
+                    }).catch(console.error);
+                } else {
+                    alert('sharing is not supported ): copy the code instead.');
+                }
+            }
+        </script>
+</body>
+</html>

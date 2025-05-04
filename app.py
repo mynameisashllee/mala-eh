@@ -1,5 +1,5 @@
 import flask
-from flask import url_for, redirect, request, render_template, session
+from flask import url_for, redirect, request, render_template, session, jsonify
 import dotenv
 import os
 from datetime import datetime, timedelta
@@ -9,6 +9,9 @@ from google.auth.transport import requests as google_auth_requests
 import googleapiclient.discovery
 from google.auth.transport.requests import Request
 import google.oauth2.credentials
+from flask_googlemaps import GoogleMaps, Map
+
+
 
 app = flask.Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -20,6 +23,11 @@ SCOPES = [
             "https://www.googleapis.com/auth/userinfo.profile",
             "https://www.googleapis.com/auth/calendar.readonly"
         ]
+
+api_key = os.environ.get("GOOGLE_API_KEY")
+GoogleMaps(app, key=api_key)
+devices_data = {}
+devices_location = {}
 
 @app.route('/')
 def index():
@@ -94,30 +102,33 @@ def logged_in():
     email = session['id_info']['email']
     name = session['id_info']['name']
     return f"""
-    <h1>Logged in</h1>
-    <h2>Welcome {name}</h2>
-    <img src="{picture}" alt="Profile Picture">
-    <h3>Email: {email}</h3>
+    <h1>mala-eh.</h1>
+    <h2>welcome {name.lower()}!</h2>
+    <button onclick="window.location.href='/create'">create group</button>
+    <button onclick="window.location.href='/join'">join group</button>
     """, 200
 
 
 
-@app.route('/join/<code>')
-def join(code):
-    return render_template('join.html', code=code)
+@app.route('/join')
+def join():
+    return render_template('join.html')
+
+@app.route('/create')
+def create():
+    return render_template('create.html')
 
 @app.route('/time', methods=['GET', 'POST'])
 def time():
     return render_template('time.html')
         
         
-        
-@app.route('/<code>/location')
-def location(code):
+@app.route('/location')
+def location():
     return render_template('location.html')
 
 @app.route('/ingredient')
-def ingredient():
+def ingredient(mp):
     ingredients = ["potato", "tomato", "tofu", "sausage", "luncheon meat", "rice", "maggi", "cheese tofu", "cabbage"]
 
     return render_template('ingredient.html', ingredients=ingredients)
@@ -136,3 +147,4 @@ def results():
 
 if __name__ == '__main__':
     app.run()
+    
