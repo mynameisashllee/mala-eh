@@ -120,8 +120,96 @@ def create():
 
 @app.route('/time', methods=['GET', 'POST'])
 def time():
-    return render_template('time.html')
+    # Check if user is logged in
+    if 'credentials' not in session or 'id_info' not in session:
+        session['final_redirect'] = url_for('time', _external=True)
+        return redirect(url_for('google_login'))
+    
+    try:
+        # Load credentials
+        creds_dict = session['credentials']
+        credentials = google.oauth2.credentials.Credentials(
+            token=creds_dict['token'],
+            refresh_token=creds_dict['refresh_token'],
+            token_uri=creds_dict['token_uri'],
+            client_id=creds_dict['client_id'],
+            client_secret=creds_dict['client_secret'],
+            scopes=creds_dict['scopes']
+        )
         
+        # Refresh token if expired
+        if credentials.expired:
+            credentials.refresh(Request())
+            # Update session with new token
+            session['credentials'] = {
+                'token': credentials.token,
+                'refresh_token': credentials.refresh_token,
+                'token_uri': credentials.token_uri,
+                'client_id': credentials.client_id,
+                'client_secret': credentials.client_secret,
+                'scopes': credentials.scopes
+            }
+            session.modified = True
+        
+        # Build service
+        service = googleapiclient.discovery.build(
+            'calendar', 
+            'v3', 
+            credentials=credentials,
+            static_discovery=False
+        )
+        
+        # Time range (now to 3 days from now)
+        now = datetime.utcnow().isoformat() + 'Z'
+        three_days_later = (datetime.utcnow() + timedelta(days=3)).isoformat() + 'Z'
+        
+        # Fetch events
+        events_result = service.events().list(
+            calendarId='primary',
+            timeMin=now,
+            timeMax=three_days_later,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        events = events_result.get('items', [])
+        
+        # Process events
+        event_durations = []
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
+            
+            if 'T' in start:  # Timed event
+                start_dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                end_dt = datetime.fromisoformat(end.replace('Z', '+00:00'))
+                duration = end_dt - start_dt
+                duration_str = str(duration)
+            else:  # All-day event
+                start_dt = datetime.fromisoformat(start)
+                end_dt = datetime.fromisoformat(end)
+                days = (end_dt - start_dt).days
+                duration_str = f"{days} day(s)"
+            
+            event_durations.append({
+                'summary': event.get('summary', '(No title)'),
+                'duration': duration_str,
+                'start': start,
+                'end': end,
+                'is_all_day': 'T' not in start
+            })
+        
+        return render_template('time.html', 
+                             events=event_durations,
+                             user_name=session['id_info'].get('name', 'User'))
+    
+    except Exception as e:
+        app.logger.error(f"Error in time endpoint: {str(e)}")
+        # Clear invalid session if there's an auth error
+        if isinstance(e, google.auth.exceptions.RefreshError):
+            session.clear()
+            return redirect(url_for('google_login'))
+        return str(e), 500
         
 @app.route('/location')
 def location():

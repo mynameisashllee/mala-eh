@@ -1,56 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mala-eh</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ user_name }} events</title>
     <style>
-        .list-group-item.disabled, .list-group-item:disabled {
-            color: #6c757d;
-            pointer-events: none;
-            background-color: #f8f9fa;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .all-day {
+            background-color: #e6f7ff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>timings</h2>
-        <p>WHEN EAT MALA</p>
-        <form method="POST">
-            <div class="row">
-                {% for day in time_slots|groupby('time.date') %}
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5>{{ day.grouper|date_format('%A, %b %d') }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="list-group">
-                                    {% for slot in day.list %}
-                                    <label class="list-group-item {% if slot.busy%}list-group-item-danger{% endif %}">
-                                        <input type="checkbox" 
-                                        name="time_slot" 
-                                        value="{{ slot.time.isoformat() }}" 
-                                        class="form-check-input me-1" 
-                                        {% if slot.busy %}disabled{% endif %}>
-                                        {{ slot.formatted }}
-                                        {% if slot.busy %}(busy){% endif %}
-                                    </label>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-            </div>
-            <button type="submit" class="btn btn-primary">save!</button>
-        </form>
-    </div>
+    <h1>Your Schedule for Next 3 Days</h1>
+    {% if events %}
+    <table>
+        <thead>
+            <tr>
+                <th>event</th>
+                <th>start</th>
+                <th>end</th>
+                <th>duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr class="{% if event.is_all_day %}all-day{% endif %}">
+                <td>{{ event.summary }}</td>
+                <td>{{ event.start }}</td>
+                <td>{{ event.end }}</td>
+                <td>{{ event.duration }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>ur free! no events.</p>
+    {% endif %}
 
-    <script>
-
-    </script>
-
+    <button class="next-btn" onclick="window.location.href = '/location';">continue!</button>
 </body>
 </html>
